@@ -1,18 +1,20 @@
-WireGuard for Ubiquiti
-======================
+# macvlan.ko for Unifi UDR
 
-WireGuard for EdgeRouter, Unifi Gateway and Unifi Dream Machine
+Ui stopped including the macvlan kernel module for the UDR. This brings it back
 
-For a full list of supported devices, please see the latest release at [releases](https://github.com/WireGuard/wireguard-vyatta-ubnt/releases).
+## Installation
 
-The installation instructions can be found in the Wiki:
+1. Get the file `setup_macvlan.sh` from the [latest release](https://github.com/whi-tw/macvlan-unifi-udr/releases/latest) and transfer it to the UDR
+1. Run it on the UDR via ssh `bash ./setup_macvlan.sh`
+1. Run the script `/data/on_boot.d/01-load-macvlan-module.sh`
+1. Continue what you were doing before that relied on having `macvlan` available
 
-- [EdgeOS / UGW](https://github.com/WireGuard/wireguard-vyatta-ubnt/wiki/EdgeOS-and-Unifi-Gateway)
-- [UnifiOS](https://github.com/WireGuard/wireguard-vyatta-ubnt/wiki/UnifiOS-%28UDM%2C-UDR%2C-UXG%29)
+## Updates
 
-Credits
--------
+This relies on the GPL archives provided by Ui. Unfortunately, these need to be requested manually for every firmware release. This means that there's no good automatic way of keeping it updated.
 
-Support for EdgeOS and Unifi Gateway was originally developed by [@Lochnair](https://github.com/Lochnair).  
-Support for UnifiOS was developed by [@tusc](https://github.com/tusc) and integrated into this repository by [@peacey](https://github.com/peacey).  
-See the [list of contributors](https://github.com/WireGuard/wireguard-vyatta-ubnt/graphs/contributors) and the [commit history](https://github.com/WireGuard/wireguard-vyatta-ubnt/commits/master) for the many other contributions.
+There is a check in place - this will only attempt to load the module build for the current firmware, so if you update UnifiOS on the UDR, the module will stop loading. I'd recommend turning auto update off, so this doesn't happen.
+
+If I haven't noticed a new firmware release, please raise an issue and I'll get onto UI to get the GPL dump out.
+
+Theoretically, the module will work on any release with the same kernel version (eg. the current dump is for 2.2.12, but the module works on 3.0.13 as they use the same kernel.). If you test this and it works fine, let me know and I'll short-circuit the update process.
