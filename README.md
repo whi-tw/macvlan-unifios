@@ -2,6 +2,15 @@
 
 Ui stopped including the macvlan kernel module for the UDR. This brings it back
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [Installation](#installation)
+- [Updates](#updates)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Installation
 
 1. Get the file `setup_macvlan.sh` from the [latest release](https://github.com/whi-tw/macvlan-unifi-udr/releases/latest) and transfer it to the UDR
