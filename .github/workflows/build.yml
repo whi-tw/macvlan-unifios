@@ -1,0 +1,83 @@
+name: Build Kernel Module
+
+on:
+  push:
+    branches:
+      - "master"
+    tags:
+      - "*"
+  pull_request:
+  workflow_dispatch:
+
+
+jobs:
+  get-firmware-list:
+    runs-on: ubuntu-22.04
+    outputs:
+      firmwares: ${{ steps.get-firmwares.outputs.directories }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build firmware list from directories in ./firmware
+        id: get-firmwares
+        run:
+          python3 ci/dir_to_json.py ./firmware >> $GITHUB_OUTPUT
+
+  build-module:
+    runs-on: ubuntu-22.04
+    needs: get-firmware-list
+    strategy:
+      matrix:
+        firmware: ${{ fromJSON(needs.get-firmware-list.outputs.firmwares) }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Load configuration for this firmware
+        run: echo CONFIG=$(jq -c . firmware/${{ matrix.firmware }}/config.json) >> $GITHUB_ENV
+      - name: Download kernel
+        run: |
+          curl -o kernel.tar.gz "${{ fromJson(env.CONFIG).kernel_tar_uri }}"
+          mkdir linux-source
+          tar -xf kernel.tar.gz --strip-components=1 -C linux-source
+      - name: Copy kernel config file into kernel directory
+        run: cp firmware/${{ matrix.firmware }}/kernel-config linux-source/.config
+      - name: Apply firmware-specific patches
+        run: find firmware/${{ matrix.firmware }}/patches -type f -name '*.patch' -print0 | sort -z | xargs -t -0 -n 1 patch -p0 -i
+      - name: Prepare for building
+        run: |
+          sudo apt install gcc-aarch64-linux-gnu
+          cd linux-source
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig prepare modules_prepare
+      - name: Build the module
+        run: |
+          cd linux-source
+          make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- drivers/net/macvlan.ko
+      - name: Add the module to the artifact directory
+        run: |
+          mkdir modules
+          cp linux-source/drivers/net/macvlan.ko modules/${{matrix.firmware}}-macvlan.ko
+      - name: Store the artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: modules
+          path: modules
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-22.04
+    needs:
+      - build-module
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@v3
+        with:
+          name: modules
+          path: modules
+      - name: Create setup_macvlan.sh
+        run: |
+          sed 's/%%GITHUB_TAG%%/${{  github.ref_name }}/' ci/setup_macvlan.sh.tpl > setup_macvlan.sh
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            modules/*
+            setup_macvlan.sh
