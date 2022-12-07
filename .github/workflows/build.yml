@@ -41,9 +41,13 @@ jobs:
         run: cp firmware/${{ matrix.firmware }}/kernel-config linux-source/.config
       - name: Apply firmware-specific patches
         run: find firmware/${{ matrix.firmware }}/patches -type f -name '*.patch' -print0 | sort -z | xargs -t -0 -n 1 patch -p0 -i
+      - name: Get and cache apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: gcc-aarch64-linux-gnu
+          version: 1.0
       - name: Prepare for building
         run: |
-          sudo apt install gcc-aarch64-linux-gnu
           cd linux-source
           make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- olddefconfig prepare modules_prepare
       - name: Build the module
