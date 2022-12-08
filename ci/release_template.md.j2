@@ -1,0 +1,7 @@
+# Release {{ release_tag }}
+
+## Supported firmware versions
+
+{% for firmware in firmwares -%}
+    - [{{ firmware }}](https://community.ui.com/releases/r/udr/{{firmware}})
+{% endfor %}
