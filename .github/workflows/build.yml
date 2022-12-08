@@ -3,14 +3,14 @@ name: Build Kernel Module
 on:
   push:
     branches:
-      - "master"
+      - "main"
     tags:
       - "*"
   pull_request:
   workflow_dispatch:
 
 jobs:
-  get-firmware-list:
+  prepare-build:
     runs-on: ubuntu-22.04
     outputs:
       firmwares: ${{ steps.get-firmwares.outputs.directories }}
@@ -19,13 +19,18 @@ jobs:
       - name: Build firmware list from directories in ./firmware
         id: get-firmwares
         run: python3 ci/dir_to_json.py ./firmware >> $GITHUB_OUTPUT
+      - name: Get and cache apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: gcc-aarch64-linux-gnu
+          version: 1.0
 
   build-module:
     runs-on: ubuntu-22.04
-    needs: get-firmware-list
+    needs: prepare-build
     strategy:
       matrix:
-        firmware: ${{ fromJSON(needs.get-firmware-list.outputs.firmwares) }}
+        firmware: ${{ fromJSON(needs.prepare-build.outputs.firmwares) }}
     steps:
       - uses: actions/checkout@v3
       - name: Load configuration for this firmware
@@ -39,7 +44,7 @@ jobs:
         run: cp firmware/${{ matrix.firmware }}/kernel-config linux-source/.config
       - name: Apply firmware-specific patches
         run: find firmware/${{ matrix.firmware }}/patches -type f -name '*.patch' -print0 | sort -z | xargs -t -0 -n 1 patch -p0 -i
-      - name: Get and cache apt dependencies
+      - name: Restore cached apt depentencies
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:
           packages: gcc-aarch64-linux-gnu
@@ -67,7 +72,7 @@ jobs:
     runs-on: ubuntu-22.04
     needs:
       - build-module
-      - get-firmware-list
+      - prepare-build
 
     steps:
       - uses: actions/checkout@v3
@@ -81,7 +86,7 @@ jobs:
       - name: Generate release notes
         run: |
           cd ci
-          python generate_release_notes.py "${{  github.ref_name }}" '${{ needs.get-firmware-list.outputs.firmwares }}' > ../release_notes.md
+          python generate_release_notes.py "${{  github.ref_name }}" '${{ needs.prepare-build.outputs.firmwares }}' > ../release_notes.md
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
