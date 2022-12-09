@@ -33,13 +33,12 @@ jobs:
         firmware: ${{ fromJSON(needs.prepare-build.outputs.firmwares) }}
     steps:
       - uses: actions/checkout@v3
-      - name: Load configuration for this firmware
-        run: echo CONFIG=$(jq -c . firmware/${{ matrix.firmware }}/config.json) >> $GITHUB_ENV
-      - name: Download kernel
+        with:
+          lfs: "true"
+      - name: Extract Kernel
         run: |
-          curl -o kernel.tar.gz "${{ fromJson(env.CONFIG).kernel_tar_uri }}"
           mkdir linux-source
-          tar -xf kernel.tar.gz --strip-components=1 -C linux-source
+          tar -xf firmware/${{ matrix.firmware }}/linux-udr.tar.gz --strip-components=1 -C linux-source
       - name: Copy kernel config file into kernel directory
         run: cp firmware/${{ matrix.firmware }}/kernel-config linux-source/.config
       - name: Apply firmware-specific patches
