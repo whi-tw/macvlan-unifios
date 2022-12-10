@@ -1,0 +1,49 @@
+name: New Firmware Request
+description: Request a module build for a specific firmware version
+title: "[FIRMWARE REQUEST]: "
+labels:
+  - "enhancement"
+  - "new firmware"
+assignees: 'whi-tw'
+body:
+  - type: input
+    id: firmware-version
+    attributes:
+      label: Firmware Version
+      description: Firmware version you are requesting. Output of `ubnt-device-info firmware`
+      placeholder: ex. v3.0.13
+    validations:
+      required: true
+  - type: input
+    id: kernel-version
+    attributes:
+      label: Kernel Version
+      description: Kernel this firmware uses. Output of `uname -r`
+      placeholder: ex. 4.4.198-ui-mtk
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Tested with previous version of the module?
+      description: |
+        Have you already tested a previous version of the module on this firmware version?
+
+        If so, please provide some kind of proof that it is working (preferably a link to an [asciinema](https://asciinema.org/) recording) (TODO: flesh out what is required for this)
+    validations:
+      required: false
+  - type: textarea
+    attributes:
+      label: Any other information / context
+      description: |
+        Anything else that could be useful here (release date / release channel etc)
+
+        Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
+    validations:
+      required: false
+  - type: checkboxes
+    attributes:
+      label: Is there an additional request for this?
+      description: Please search to see if there is already an issue requesting this firmware release
+      options:
+        - label: I have searched the existing issues
+          required: true
