@@ -79,18 +79,15 @@ jobs:
         with:
           name: modules
           path: modules
-      - name: Create setup_macvlan.sh
+      - name: Generate release text files
         run: |
-          sed 's/%%GITHUB_TAG%%/${{  github.ref_name }}/' ci/setup_macvlan.sh.tpl > setup_macvlan.sh
-      - name: Generate release notes
-        run: |
-          cd ci
-          python generate_release_notes.py "${{  github.ref_name }}" '${{ needs.prepare-build.outputs.firmwares }}' > ../release_notes.md
+          python ci/build_release_text_files.py "${{  github.ref_name }}" '${{ needs.prepare-build.outputs.firmwares }}' ./modules
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
           draft: "true"
-          body_path: release_notes.md
+          body_path: text_files_out/release_notes.md
           files: |
+            text_files_out/checksums.txt
+            text_files_out/setup_macvlan.sh
             modules/*
-            setup_macvlan.sh

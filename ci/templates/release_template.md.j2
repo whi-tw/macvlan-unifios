@@ -12,3 +12,11 @@
 1. Run it on the UDR via ssh `bash ./setup_macvlan.sh`
 1. Run the script `/data/on_boot.d/01-load-macvlan-module.sh`
 1. Continue what you were doing before that relied on having `macvlan` available
+
+## SHA256 Checksums
+
+```
+{% for filename, sha256sum in checksums.items() -%}
+    {{ sha256sum }}  {{ filename }}
+{% endfor %}
+```

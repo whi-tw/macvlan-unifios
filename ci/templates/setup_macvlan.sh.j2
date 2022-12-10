@@ -5,7 +5,7 @@ set -euo pipefail
 RUNNING_FIRMWARE_VERSION="$(ubnt-device-info firmware)"
 MODULE_FILE_NAME="${RUNNING_FIRMWARE_VERSION}-macvlan.ko"
 
-RELEASE_TAG="%%GITHUB_TAG%%"
+RELEASE_TAG="{{ release_tag }}"
 
 RELEASE_DOWNLOAD_URL_BASE="https://github.com/whi-tw/macvlan-unifi-udr/releases/download/${RELEASE_TAG}"
 RELEASE_DOWNLOAD_URL="${RELEASE_DOWNLOAD_URL_BASE}/${MODULE_FILE_NAME}"
