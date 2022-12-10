@@ -55,7 +55,7 @@ checksums["setup_macvlan.sh"] = hashlib.sha256(
 checksums_rendered = checksums_template.render(
     checksums=checksums
 )
-checksums_path.write_text(checksums_rendered)
+checksums_path.write_text(checksums_rendered + "\n")
 
 release_notes_rendered = release_template.render(
     release_tag=release_tag,
@@ -63,7 +63,7 @@ release_notes_rendered = release_template.render(
     checksums=checksums
 )
 
-release_notes_path.write_text(release_notes_rendered)
+release_notes_path.write_text(release_notes_rendered + "\n")
 
 print(f"""Created:
   - {setup_script_path}
