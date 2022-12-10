@@ -1,0 +1,9 @@
+--- linux-source/drivers/net/macvlan.c	2021-10-28 11:55:15.000000000 +0000
++++ macvlan.c	2022-12-10 17:11:50.515520812 +0000
+@@ -1614,5 +1614,5 @@
+ 
+ MODULE_LICENSE("GPL");
+ MODULE_AUTHOR("Patrick McHardy <kaber@trash.net>");
+-MODULE_DESCRIPTION("Driver for MAC address based VLANs");
++MODULE_DESCRIPTION("Driver for MAC address based VLANs (https://github.com/whi-tw/macvlan-unifi-udr %%GIT_REF%%)");
+ MODULE_ALIAS_RTNL_LINK("macvlan");
