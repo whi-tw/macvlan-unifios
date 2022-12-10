@@ -89,6 +89,7 @@ jobs:
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
+          draft: "true"
           body_path: release_notes.md
           files: |
             modules/*
