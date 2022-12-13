@@ -34,12 +34,29 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          lfs: "true"
           fetch-depth: 0
+      - name: Extract kernel download URL
+        id: get-kernel-url
+        run: |
+          KERNEL_URL="$(cat firmware/${{ matrix.firmware }}/kernel-url.txt | tr -d '\n')"
+          echo "kernel-url=${KERNEL_URL}" >> $GITHUB_OUTPUT
+          echo "kernel-url-b64=$(echo ${KERNEL_URL} | base64 -w0)" >> $GITHUB_OUTPUT
+      - name: Restore kernel archive from cache
+        id: cache-kernel-archive
+        uses: actions/cache@v3
+        with:
+          path: ./linux-udr.tar.gz
+          key: ${{ steps.get-kernel-url.outputs.kernel-url-b64 }}
+      - name: Download kernel archive if required
+        if: steps.cache-kernel-archive.outputs.cache-hit != 'true'
+        run: |
+          curl -Lo ./linux-udr.tar.gz "${{ steps.get-kernel-url.outputs.kernel-url }}"
+      - name: Ensure kernel SHA matches
+        run: sha256sum -c firmware/${{ matrix.firmware }}/linux-udr.tar.gz.sum
       - name: Extract Kernel
         run: |
           mkdir linux-source
-          tar -xf firmware/${{ matrix.firmware }}/linux-udr.tar.gz --strip-components=1 -C linux-source
+          tar -xf ./linux-udr.tar.gz --strip-components=1 -C linux-source
       - name: Copy kernel config file into kernel directory
         run: cp firmware/${{ matrix.firmware }}/kernel-config linux-source/.config
       - name: Update git tag placeholder in any patches
