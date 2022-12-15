@@ -58,4 +58,4 @@ I don't _really_ have time to provide any support for this project. If I spot an
 
 As stated in the GPL-3 License, no liability or warranty is provided for these kernel module builds. I have tested them on my own USR and am using them in production, but the same may not be the case for you.
 
-So long as you are using the correct module build for your USR's firmware, you _should_ not have any issues, but as we are building non-standard modules, there's no 100% guarantee.
+So long as you are using the correct module build for your UDR's firmware, you _should_ not have any issues, but as we are building non-standard modules, there's no 100% guarantee.
