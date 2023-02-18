@@ -1,0 +1,5 @@
+{
+    "$schema": "../../../.schemas/firmware_metadata.schema.json",
+    "kernel-url": "https://archive.org/download/unifi-udr-gpl-archives/linux-udr-2.2.12.tar.gz",
+    "kernel-sha256sum": "d232dec7c148a44b74e1ddfd6d336a32d4a228ee70b3dba586c3a7e43d9f31b7"
+}
