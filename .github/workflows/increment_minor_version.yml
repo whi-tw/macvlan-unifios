@@ -34,6 +34,6 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add pyproject.toml
+          git add macvlan-unifios-version
           git commit -m "Bump version to ${{ steps.bump.outputs.version }}"
           git push
