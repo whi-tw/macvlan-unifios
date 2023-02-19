@@ -6,6 +6,7 @@
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 name: Increment minor version
 jobs:
@@ -25,7 +26,7 @@ jobs:
         id: bump
         run: |
           echo "Current version: $(cat macvlan-unifios-version)"
-          semver-cli inc minor $(cat macvlan-unifios-version) > macvlan-unifios-version
+          $(go env GOPATH)/bin/semver-cli inc minor $(cat macvlan-unifios-version) > macvlan-unifios-version
           echo "New version: $(cat macvlan-unifios-version)"
           echo "version=$(cat macvlan-unifios-version)" >> $GITHUB_OUTPUT
 
