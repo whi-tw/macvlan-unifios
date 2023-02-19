@@ -4,9 +4,10 @@
 
 {% for device, firmwares in devices.items() -%}
 ### {{ device }}
-    {% for firmware in firmwares -%}
-        - {{ firmware.version }}
-    {% endfor %}
+
+{% for firmware in firmwares -%}
+- {{ firmware.version }}
+{% endfor %}
 {% endfor %}
 
 ## Installation

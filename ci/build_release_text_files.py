@@ -23,6 +23,9 @@ for directory in artifact_directory.iterdir():
             "directory": directory
         })
 
+for device,versions in devices.items():
+    devices[device] = sorted(versions, key=lambda x: parse_version(x["version"]))
+
 my_output_directory = pathlib.Path("text_files_out")
 my_output_directory.mkdir(exist_ok=True)
 
