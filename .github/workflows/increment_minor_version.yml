@@ -1,0 +1,38 @@
+# This workflow increments the minor version
+# when a release has been released
+
+## Adapted from https://github.com/AP-Hunt/cf-traverse/blob/main/.github/workflows/increment_minor_version_and_create_release.yml
+
+on:
+  release:
+    types: [published]
+
+name: Increment minor version
+jobs:
+  increment_minor_version:
+    name: Increment minor version
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # 3.3.0
+      - uses: actions/setup-go@6edd4406fa81c3da01a34fa6f6343087c207a568 # 3.5.0
+
+      - name: Install Dependencies
+        run: go install github.com/davidrjonas/semver-cli@latest
+
+      - name: 👷 Increment minor version
+        id: bump
+        run: |
+          echo "Current version: $(cat macvlan-unifios-version)"
+          semver-cli inc minor $(cat macvlan-unifios-version) > macvlan-unifios-version
+          echo "New version: $(cat macvlan-unifios-version)"
+          echo "version=$(cat macvlan-unifios-version)" >> $GITHUB_OUTPUT
+
+      - name: 👷 Commit, push
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add pyproject.toml
+          git commit -m "Bump version to ${{ steps.bump.outputs.version }}"
+          git push

@@ -4,14 +4,24 @@ title: "[FIRMWARE REQUEST]: "
 labels:
   - "enhancement"
   - "new firmware"
-assignees: 'whi-tw'
 body:
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      description: Which device is this for?
+      multiple: false
+      options:
+        - "UDR (Unifi Dream Router)"
+        - "UDM (Unifi Dream Machine)"
+        - "UDM-Pro (Unifi Dream Machine Pro)"
+        - "UDM-SE (Unifi Dream Machine SE)"
   - type: input
     id: firmware-version
     attributes:
       label: Firmware Version
       description: Firmware version you are requesting. Output of `ubnt-device-info firmware`
-      placeholder: ex. v3.0.13
+      placeholder: ex. 3.0.13
     validations:
       required: true
   - type: input
@@ -33,6 +43,20 @@ body:
       required: false
   - type: textarea
     attributes:
+      label: Kernel build options
+      description: Output of `zcat /proc/config.gz`. Please put this into a file and upload by clicking this area to highlight it and then dragging the file in.
+      placeholder: Please don't just paste the command output into this box - upload as a file, as-per the instructions above!
+  - type: checkboxes
+    attributes:
+      label: Extra information
+      description: Additional questions to help get the module for this version built?
+      options:
+        - label: Are you currently running this firmware version?
+          required: false
+        - label: Would you be willing to test the built module?
+          required: false
+  - type: textarea
+    attributes:
       label: Any other information / context
       description: |
         Anything else that could be useful here (release date / release channel etc)
@@ -42,7 +66,7 @@ body:
       required: false
   - type: checkboxes
     attributes:
-      label: Is there an additional request for this?
+      label: Is there an existing request for this?
       description: Please search to see if there is already an issue requesting this firmware release
       options:
         - label: I have searched the existing issues

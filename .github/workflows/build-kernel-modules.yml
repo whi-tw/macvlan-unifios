@@ -1,0 +1,119 @@
+name: Build Kernel Module
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  prepare-build:
+    runs-on: ubuntu-22.04
+    if: "!contains(github.event.head_commit.message, 'Bump version to ')"
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: 🏗️ Build matrix
+        id: matrix
+        run: python3 ci/generate_build_matrix.py >> $GITHUB_OUTPUT
+      - name: 🏗️ Collect crosscompiler packages
+        id: crosscompilers
+        run: python3 ci/get_all_crosscompilers.py >> $GITHUB_OUTPUT
+      - name: Get and cache apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: ${{ steps.crosscompilers.outputs.ALL_CROSSCOMPILERS }}
+          version: 1.0
+      - name: Get version
+        id: version
+        run: echo "version=$(cat ./macvlan-unifios-version)" >> $GITHUB_OUTPUT
+
+  build-module:
+    runs-on: ubuntu-22.04
+    needs: prepare-build
+    strategy:
+      matrix: ${{ fromJSON(needs.prepare-build.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Extract device metadata
+        id: get-device-metadata
+        run: python3 ci/get_device_metadata.py ${{ matrix.device }} >> $GITHUB_OUTPUT
+      - name: Extract firmware metadata
+        id: get-firmware-metadata
+        run: |
+          python ci/get_firmware_metadata.py ${{ matrix.device }} ${{ matrix.firmware }} >> $GITHUB_OUTPUT
+          FIRMWARE_DIRECTORY='devices/${{ matrix.device }}/${{ matrix.firmware }}'
+          echo "firmware-directory=${FIRMWARE_DIRECTORY}" >> $GITHUB_OUTPUT
+      - name: Restore kernel archive from cache
+        id: cache-kernel-archive
+        uses: actions/cache@v3
+        with:
+          path: ./linux-unifios.tar.gz
+          key: ${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-url-base64 }}
+      - name: Download kernel archive if required
+        if: steps.cache-kernel-archive.outputs.cache-hit != 'true'
+        run: |
+          curl -Lo ./linux-unifios.tar.gz "${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-url }}"
+      - name: Ensure kernel SHA matches
+        run: echo '${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-sha256sum }}  linux-unifios.tar.gz' | sha256sum -c
+      - name: Extract Kernel
+        run: |
+          mkdir linux-source
+          tar -xf ./linux-unifios.tar.gz --strip-components=1 -C linux-source
+      - name: Copy kernel config file into kernel directory
+        run: cp ${{ steps.get-firmware-metadata.outputs.firmware-directory }}/kernel-config linux-source/.config
+      - name: Update version placeholder in any patches
+        run: |
+          sed -i "s@%%VERSION%%@${{ needs.prepare-build.outputs.version }}@" ${{ steps.get-firmware-metadata.outputs.firmware-directory }}/patches/*.patch
+      - name: Apply firmware-specific patches
+        run: find ${{ steps.get-firmware-metadata.outputs.firmware-directory }}/patches -type f -name '*.patch' -print0 | sort -z | xargs -t -0 -n 1 patch -p0 -i
+      - name: Restore cached apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: ${{ fromJSON(steps.get-device-metadata.outputs.json).cross-compiler-package }}
+          version: 1.0
+      - name: Prepare for building
+        run: |
+          cd linux-source
+          make ARCH=${{ fromJSON(steps.get-device-metadata.outputs.json).architecture }} CROSS_COMPILE=${{ fromJSON(steps.get-device-metadata.outputs.json).cross-compiler }} olddefconfig prepare
+      - name: Build the module
+        run: |
+          cd linux-source
+          make ARCH=${{ fromJSON(steps.get-device-metadata.outputs.json).architecture }} CROSS_COMPILE=${{ fromJSON(steps.get-device-metadata.outputs.json).cross-compiler }} drivers/net/macvlan.ko
+      - name: Store the artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.device }}-${{ matrix.firmware }}_macvlan.ko
+          path: linux-source/drivers/net/macvlan.ko
+
+  release:
+    if: github.ref == 'refs/heads/main' # if branch is main
+    runs-on: ubuntu-22.04
+    needs:
+      - build-module
+      - prepare-build
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # 3.0.2
+        id: download
+        with:
+          path: built_modules
+      - run: ls -lR
+      - name: Generate release text files
+        run: |
+          python ci/build_release_text_files.py "${{  github.ref_name }}" '${{ needs.prepare-build.outputs.firmwares }}' ./modules
+      - name: Create release
+        uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # 1.12.0
+        with:
+          draft: true
+          allowUpdates: true
+          artifacts: ${{steps.download.outputs.download-path}}/**.ko,text_files_out/checksums.txt,text_files_out/setup_macvlan.sh
+          name: ${{ needs.prepare-build.outputs.version }}
+          tag: v${{ needs.prepare-build.outputs.version }}
+          bodyFile: text_files_out/release_notes.md

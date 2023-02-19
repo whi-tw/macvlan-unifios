@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/whi-tw/macvlan-unifios/firmware_metadata.schema.json",
+  "title": "Firmware Metadata",
+  "description": "Metadata for a specific firmware version",
+  "type": "object",
+  "properties": {
+    "kernel-url": {
+      "description": "URL to the kernel image",
+      "type": "string",
+      "format": "uri"
+    },
+    "kernel-sha256sum": {
+      "description": "SHA256 hash of the kernel image",
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    }
+  }
+}

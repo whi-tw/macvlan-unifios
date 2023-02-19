@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/whi-tw/macvlan-unifios/device_metadata.schema.json",
+  "title": "Device Metadata",
+  "description": "Metadata for a specific UniFi OS device",
+  "type": "object",
+  "properties": {
+    "architecture": {
+      "description": "The architecture of the device",
+      "type": "string",
+      "pattern": "^[0-9a-z]+$"
+    },
+    "cross-compiler": {
+      "description": "The cross-compiler used to build the device's kernel",
+      "type": "string",
+      "pattern": "^[0-9a-z-]+-$"
+    },
+    "cross-compiler-package": {
+      "description": "The package containing the cross-compiler used to build the device's kernel",
+      "type": "string",
+      "pattern": "^[0-9a-z-]+$"
+    }
+  }
+}
