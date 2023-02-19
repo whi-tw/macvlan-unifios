@@ -85,11 +85,13 @@ jobs:
         run: |
           cd linux-source
           make ARCH=${{ fromJSON(steps.get-device-metadata.outputs.json).architecture }} CROSS_COMPILE=${{ fromJSON(steps.get-device-metadata.outputs.json).cross-compiler }} drivers/net/macvlan.ko
+      - name: Rename the artifact file
+        run: mv linux-source/drivers/net/macvlan.ko ./${{ matrix.device }}-${{ matrix.firmware }}_macvlan.ko
       - name: Store the artifact
         uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.device }}-${{ matrix.firmware }}_macvlan.ko
-          path: linux-source/drivers/net/macvlan.ko
+          path: ./${{ matrix.device }}-${{ matrix.firmware }}_macvlan.ko
 
   release:
     if: github.ref == 'refs/heads/main' # if branch is main
