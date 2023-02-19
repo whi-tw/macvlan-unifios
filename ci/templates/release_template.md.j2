@@ -2,12 +2,12 @@
 
 ## Supported firmware versions
 
-{% for device in devices -%}
+{% for device, firmwares in devices.items() -%}
 ### {{ device }}
     {% for firmware in firmwares -%}
-        - [{{ firmware }}](https://community.ui.com/releases/r/udr/{{firmware}})
+        - {{ firmware.version }}
     {% endfor %}
-{% endfor %
+{% endfor %}
 
 ## Installation
 

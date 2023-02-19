@@ -104,16 +104,15 @@ jobs:
         id: download
         with:
           path: built_modules
-      - run: ls -lR
       - name: Generate release text files
         run: |
-          python ci/build_release_text_files.py "${{  github.ref_name }}" '${{ needs.prepare-build.outputs.firmwares }}' ./modules
+          python ci/build_release_text_files.py v${{ needs.prepare-build.outputs.version }} ${{steps.download.outputs.download-path}}
       - name: Create release
         uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # 1.12.0
         with:
           draft: true
           allowUpdates: true
-          artifacts: ${{steps.download.outputs.download-path}}/**.ko,text_files_out/checksums.txt,text_files_out/setup_macvlan.sh
+          artifacts: ${{steps.download.outputs.download-path}}/*/*.ko,text_files_out/checksums.txt,text_files_out/setup_macvlan.sh
           name: ${{ needs.prepare-build.outputs.version }}
           tag: v${{ needs.prepare-build.outputs.version }}
           bodyFile: text_files_out/release_notes.md

@@ -9,11 +9,19 @@ import jinja2
 from pkg_resources import parse_version
 
 release_tag = sys.argv[1]
+artifact_directory = pathlib.Path(sys.argv[2]).resolve()
 
-firmwares = json.loads(sys.argv[2])
-firmwares.sort(key=parse_version, reverse=True)
+devices = {}
 
-modules_output_directory = pathlib.Path(sys.argv[3]).resolve()
+for directory in artifact_directory.iterdir():
+    if directory.is_dir():
+        device_name = directory.name.split("-")[0]
+        if device_name not in devices:
+            devices[device_name] = []
+        devices[device_name].append({
+            "version": directory.name.split("-")[1].split("_")[0],
+            "directory": directory
+        })
 
 my_output_directory = pathlib.Path("text_files_out")
 my_output_directory.mkdir(exist_ok=True)
@@ -26,14 +34,15 @@ template_directory = pathlib.Path(__file__).parent.resolve() / "templates"
 
 checksums = {}
 
-for firmware in firmwares:
-    filename = f"{firmware}-macvlan.ko"
+for device, firmwares in devices.items():
+    for firmware in firmwares:
+        filename = firmware["directory"] / firmware["directory"].name
 
-    sha256_hash = hashlib.sha256()
-    with open(modules_output_directory / filename, "rb") as f:
-        for byte_block in iter(lambda: f.read(4096), b""):
-            sha256_hash.update(byte_block)
-    checksums[f"{firmware}-macvlan.ko"] = sha256_hash.hexdigest()
+        sha256_hash = hashlib.sha256()
+        with open(filename, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        checksums[firmware["directory"].name] = sha256_hash.hexdigest()
 
 
 
@@ -59,7 +68,7 @@ checksums_path.write_text(checksums_rendered + "\n")
 
 release_notes_rendered = release_template.render(
     release_tag=release_tag,
-    firmwares=firmwares,
+    devices=devices,
     checksums=checksums
 )
 
