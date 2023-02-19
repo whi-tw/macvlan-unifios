@@ -47,4 +47,11 @@ repos:
     rev: 0.21.0
     hooks:
       - id: check-github-workflows
-      - id: check-metaschema
+      - id: check-jsonschema
+        name: Check device_metadata.json files against schema
+        files: "^devices/.*/device_metadata.json$"
+        args: ["--schemafile", ".schemas/device_metadata.schema.json"]
+      - id: check-jsonschema
+        name: Check firmware_metadata.json files against schema
+        files: "^devices/.*/firmware_metadata.json$"
+        args: ["--schemafile", ".schemas/firmware_metadata.schema.json"]
