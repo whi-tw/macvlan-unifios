@@ -60,6 +60,12 @@ I don't _really_ have time to provide any support for this project. If I spot an
 
 This was initially created for the UDR, but it [seems](https://github.com/whi-tw/macvlan-unifios/issues/12) that Ubiquiti have stopped including the module on all recent Unifi OS devices. If your device isn't listed in the [latest release](https://github.com/whi-tw/macvlan-unifios/releases/latest), raise an issue, using the 'New Firmware Request' template.
 
+## GPL Archive Archive
+
+> Yes, the heading is correct, this is an archive or archives!
+
+I am archiving the GPL archives requested from UniFi on archive.org: [UniFi OS GPL Archives](https://archive.org/details/unifi-udr-gpl-archives). 
+
 ## Compatibility disclaimer
 
 As stated in the GPL-3 License, no liability or warranty is provided for these kernel module builds. I have tested them on my own USR and am using them in production, but the same may not be the case for you.
