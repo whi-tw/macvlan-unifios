@@ -11,6 +11,7 @@ Ubiquiti stopped including the macvlan kernel module into recent UniFi OS releas
 - [Update frequency](#update-frequency)
 - [Support](#support)
 - [UniFi OS Models](#unifi-os-models)
+- [GPL Archive Archive](#gpl-archive-archive)
 - [Compatibility disclaimer](#compatibility-disclaimer)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -59,6 +60,12 @@ I don't _really_ have time to provide any support for this project. If I spot an
 ## UniFi OS Models
 
 This was initially created for the UDR, but it [seems](https://github.com/whi-tw/macvlan-unifios/issues/12) that Ubiquiti have stopped including the module on all recent Unifi OS devices. If your device isn't listed in the [latest release](https://github.com/whi-tw/macvlan-unifios/releases/latest), raise an issue, using the 'New Firmware Request' template.
+
+## GPL Archive Archive
+
+> Yes, the heading is correct, this is an archive or archives!
+
+I am archiving the GPL archives requested from UniFi on archive.org: [UniFi OS GPL Archives](https://archive.org/details/unifi-udr-gpl-archives).
 
 ## Compatibility disclaimer
 
