@@ -22,8 +22,9 @@ jobs:
           echo "${{github.event.issue.body}}" | python ci/get_fields_from_new_firmware_issue.py >> $GITHUB_OUTPUT
       - name: Tag the issue
         run: |
+          LABEL_NAME="device: ${{ steps.issue-fields.outputs.device }}"
+          gh label list | grep "${LABEL_NAME}" || gh label create "${LABEL_NAME}"
           gh issue edit ${{ github.event.issue.number }} --add-label "device: ${{ steps.issue-fields.outputs.device }}"
-          gh issue edit ${{ github.event.issue.number }} --add-label "firmware: ${{ steps.issue-fields.outputs.firmware_version }}"
       - name: Fix the issue title
         run: |
           gh issue edit ${{ github.event.issue.number }} --title "[FIRMWARE REQUEST]: ${{ steps.issue-fields.outputs.device }} ${{ steps.issue-fields.outputs.firmware_version }}"
