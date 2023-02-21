@@ -32,6 +32,7 @@ jobs:
         run: |
           if [ -d "./devices/${{ steps.issue-fields.outputs.device }}/${{ steps.issue-fields.outputs.firmware_version }}" ]; then
             gh issue comment ${{ github.event.issue.number }} -b "It appears that this firmware may already be supported. If this is incorrect, please reopen the issue!"
+            gh issue edit ${{ github.event.issue.number }} --add-label "duplicate"
             gh issue close ${{ github.event.issue.number }}
             exit 1
           fi
