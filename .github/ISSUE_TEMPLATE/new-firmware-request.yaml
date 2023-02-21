@@ -11,12 +11,13 @@ body:
       label: Device
       description: Which device is this for?
       multiple: false
-      required: true
       options:
         - "UDR (Unifi Dream Router)"
         - "UDM (Unifi Dream Machine)"
         - "UDM-Pro (Unifi Dream Machine Pro)"
         - "UDM-SE (Unifi Dream Machine SE)"
+    validations:
+      required: true
   - type: input
     id: firmware-version
     attributes:
