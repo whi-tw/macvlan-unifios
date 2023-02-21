@@ -6,7 +6,7 @@ body_lines = sys.stdin.readlines()
 
 body_sections = []
 
-current_section={}
+current_section = {}
 
 for line in body_lines:
     line = line.strip()
@@ -34,9 +34,9 @@ for section in body_sections:
         case _:
             component_name = section_title.lower().replace(" ", "_").replace("/", "")
             if section["lines"][0] == "_No response_":
-                value=[]
+                value = []
             else:
-                value=section["lines"]
+                value = section["lines"]
             issue_components[component_name] = json.dumps(value)
 
 for key, value in issue_components.items():
