@@ -1,0 +1,34 @@
+name: Update new firmware request issue
+
+on:
+  issues:
+    types:
+      - opened
+
+jobs:
+  process-new-issue:
+    name: Process new issue
+    runs-on: ubuntu-22.04
+    if: "contains(github.event.issue.labels.*.name, 'new firmware')"
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Get fields from issue
+        id: issue-fields
+        run: |
+          echo "${{github.event.issue.body}}" | python ci/get_fields_from_new_firmware_issue.py >> $GITHUB_OUTPUT
+      - name: Tag the issue
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --add-label "device: ${{ steps.issue-fields.outputs.device }}"
+          gh issue edit ${{ github.event.issue.number }} --add-label "firmware: ${{ steps.issue-fields.outputs.firmware_version }}"
+      - name: Fix the issue title
+        run: |
+          gh issue edit ${{ github.event.issue.number }} --title "[FIRMWARE REQUEST]: ${{ steps.issue-fields.outputs.device }} ${{ steps.issue-fields.outputs.firmware_version }}"
+      - name: Check firmware is definitely not supported already
+        run: |
+          if [ -d "./devices/${{ steps.issue-fields.outputs.device }}/${{ steps.issue-fields.outputs.firmware_version }}" ]; then
+            gh issue comment ${{ github.event.issue.number }} -b "It appears that this firmware may already be supported. If this is incorrect, please reopen the issue!"
+            gh issue close ${{ github.event.issue.number }}
+            exit 1
+          fi

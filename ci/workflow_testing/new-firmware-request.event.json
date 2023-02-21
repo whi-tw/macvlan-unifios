@@ -1,0 +1,14 @@
+{
+    "issue": {
+        "labels": [
+            {
+                "name": "enhancement"
+            },
+            {
+                "name": "new firmware"
+            }
+        ],
+        "body": "### Device\n\nUDR (Unifi Dream Router)\n\n### Firmware Version\n\n3.0.17\n\n### Kernel Version\n\n_No response_\n\n### Tested with previous version of the module?\n\n_No response_\n\n### Kernel build options\n\n_No response_\n\n### Extra information\n\n- [ ] Are you currently running this firmware version?\n- [ ] Would you be willing to test the built module?\n\n### Any other information / context\n\n_No response_\n\n### Is there an existing request for this?\n\n- [X] I have searched the existing issues\n",
+        "number": 13
+    }
+}
