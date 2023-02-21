@@ -4,7 +4,15 @@ on:
   push:
     branches:
       - main
+    paths:
+      - devices/**
+      - ci/*.py
+      - .github/workflows/build-kernel-modules.yml
   pull_request:
+    paths:
+      - devices/**
+      - ci/*.py
+      - .github/workflows/build-kernel-modules.yml
   workflow_dispatch:
 
 jobs:
