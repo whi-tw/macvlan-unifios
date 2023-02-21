@@ -9,7 +9,7 @@ MODULE_FILE_NAME="${DEVICE}-${RUNNING_FIRMWARE_VERSION}_macvlan.ko"
 
 RELEASE_TAG="{{ release_tag }}"
 
-RELEASE_DOWNLOAD_URL_BASE="https://github.com/whi-tw/macvlan-unifi-udr/releases/download/${RELEASE_TAG}"
+RELEASE_DOWNLOAD_URL_BASE="https://github.com/whi-tw/macvlan-unifios/releases/download/${RELEASE_TAG}"
 RELEASE_DOWNLOAD_URL="${RELEASE_DOWNLOAD_URL_BASE}/${MODULE_FILE_NAME}"
 
 DATA_DIR="/data"
@@ -21,8 +21,12 @@ curl -Lo "${MODULE_DIR}/${MODULE_FILE_NAME}" "${RELEASE_DOWNLOAD_URL}" || {
     echo
     echo "****************************************************************************************"
     echo "!! Failed to download module file from ${RELEASE_DOWNLOAD_URL}"
-    echo "!! Please check that your device(${DEVICE}) and firmware version (${RUNNING_FIRMWARE_VERSION}) is supported in release ${RELEASE_TAG}."
-    echo "!! Release URL: https://github.com/whi-tw/macvlan-unifi-udr/releases/tag/${RELEASE_TAG}"
+    echo "!! Please check that your device (${DEVICE}) and firmware version"
+    echo "!! (${RUNNING_FIRMWARE_VERSION}) is supported in release ${RELEASE_TAG}."
+    echo "!! Release URL: https://github.com/whi-tw/macvlan-unifios/releases/tag/${RELEASE_TAG}"
+    echo "!!"
+    echo "!! If your device / firmware version is not supported, please open an issue:"
+    echo "!! https://github.com/whi-tw/macvlan-unifios/issues/new/choose"
     echo "****************************************************************************************"
     exit 1
 }
@@ -34,7 +38,14 @@ DEVICE="$(ubnt-device-info  model_short)"
 RUNNING_FIRMWARE_VERSION="$(ubnt-device-info firmware)"
 MODULE_FILE_NAME="${DEVICE}-${RUNNING_FIRMWARE_VERSION}_macvlan.ko"
 
-insmod /data/macvlan-module/${MODULE_FILE_NAME}
+MODULE_FILE_PATH="/data/macvlan-module/${MODULE_FILE_NAME}"
+
+if [[ ! -f "${MODULE_FILE_PATH}" ]]; then
+  echo "Module for ${DEVICE} running f/w ${RUNNING_FIRMWARE_VERSION} not found."
+  echo "Update from the latest release: https://github.com/whi-tw/macvlan-unifios/releases/latest"
+  exit 1
+fi
+insmod "${MODULE_FILE_PATH}"
 EOF
 
 chmod +x /data/on_boot.d/01-load-macvlan-module.sh
