@@ -36,3 +36,8 @@ jobs:
             gh issue close ${{ github.event.issue.number }}
             exit 1
           fi
+      - name: Generate email body to request GPL Archive
+        run: |
+          COMMENT_BODY="$(python ci/render_request_email_issue_comment.py "${{ steps.issue-fields.outputs.device }} ${{ steps.issue-fields.outputs.firmware_version }}")"
+
+          gh issue comment ${{ github.event.issue.number }} -b "${COMMENT_BODY}"
