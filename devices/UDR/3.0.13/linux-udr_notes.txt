@@ -1,3 +1,0 @@
-Original file name: linux-mediatek-4.4.198-ui-mtk.tar.gz
-Source: https://secure-uploads.ui.com/receive/?thread=WA0D-1VR8&packageCode=JYEeU1R7sHWSIka66lY0oUYAovQXh5aF4EhpVOfNbJ8#keyCode=ZoUvURgKmvQ1d_uY3FofeN_2yiewxPOkj6QLOdhsg5A
-SHA256: b28c3737306ae0172d2b99fd5c9af881f0c14367e453481aaa0129a7883301fc
