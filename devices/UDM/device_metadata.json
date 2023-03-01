@@ -1,0 +1,6 @@
+{
+    "$schema": "../../.schemas/device_metadata.schema.json",
+    "architecture": "arm64",
+    "cross-compiler": "aarch64-linux-gnu-",
+    "cross-compiler-package": "gcc-aarch64-linux-gnu"
+}
