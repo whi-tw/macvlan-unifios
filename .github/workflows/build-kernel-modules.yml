@@ -51,6 +51,7 @@ jobs:
     needs: prepare-build
     strategy:
       matrix: ${{ fromJSON(needs.prepare-build.outputs.matrix) }}
+      fail-fast: false
     steps:
       - uses: actions/checkout@v3
         with:
