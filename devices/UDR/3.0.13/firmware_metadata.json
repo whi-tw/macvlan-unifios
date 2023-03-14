@@ -1,5 +1,5 @@
 {
     "$schema": "../../../.schemas/firmware_metadata.schema.json",
-    "kernel-url": "https://archive.org/download/unifi-udr-gpl-archives/UDR/linux-udr-3.0.13.tar.gz",
+    "kernel-archive-path": "UDR/linux-udr-3.0.13.tar.gz",
     "kernel-sha256sum": "b28c3737306ae0172d2b99fd5c9af881f0c14367e453481aaa0129a7883301fc"
 }

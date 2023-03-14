@@ -37,4 +37,6 @@ for device in devices:
         )
 
 matrix = {"include": matrix_combinations}
-print(f"matrix={json.dumps(matrix)}")
+
+with open(os.environ.get("GITHUB_OUTPUT", False), "a") as f:
+    f.write(f"matrix={json.dumps(matrix)}\n")

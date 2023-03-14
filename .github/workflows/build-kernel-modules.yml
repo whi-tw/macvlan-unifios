@@ -15,6 +15,10 @@ on:
       - .github/workflows/build-kernel-modules.yml
   workflow_dispatch:
 
+env:
+  APT_DEPS: aria2
+  DOWNLOAD_FROM_TORRENT: false
+
 jobs:
   prepare-build:
     runs-on: ubuntu-22.04
@@ -25,22 +29,40 @@ jobs:
       python: ${{ steps.tool-versions.outputs.python }}
     steps:
       - uses: actions/checkout@v3
+
       - name: Read .tool-versions
         uses: marocchino/tool-versions-action@v1
         id: tool-versions
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ steps.tool-versions.outputs.python }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ steps.tool-versions.outputs.python }}-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+
       - name: 🏗️ Build matrix
         id: matrix
-        run: python3 ci/generate_build_matrix.py >> $GITHUB_OUTPUT
+        run: poetry run python3 ci/generate_build_matrix.py
       - name: 🏗️ Collect crosscompiler packages
         id: crosscompilers
-        run: python3 ci/get_all_crosscompilers.py >> $GITHUB_OUTPUT
+        run: poetry run python3 ci/get_all_crosscompilers.py
       - name: Get and cache apt dependencies
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:
-          packages: ${{ steps.crosscompilers.outputs.ALL_CROSSCOMPILERS }}
+          packages: ${{ steps.crosscompilers.outputs.ALL_CROSSCOMPILERS }} ${{ env.APT_DEPS }}
           version: 1.0
       - name: Get version
         id: version
@@ -56,28 +78,66 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+
       - uses: actions/setup-python@v4
         with:
           python-version: ${{ needs.prepare-build.outputs.python }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ needs.prepare-build.outputs.python }}-${{ hashFiles('**/poetry.lock') }}
+
       - name: Extract device metadata
         id: get-device-metadata
-        run: python3 ci/get_device_metadata.py ${{ matrix.device }} >> $GITHUB_OUTPUT
+        run: poetry run python3 ci/get_device_metadata.py ${{ matrix.device }}
+
       - name: Extract firmware metadata
         id: get-firmware-metadata
         run: |
-          python3 ci/get_firmware_metadata.py ${{ matrix.device }} ${{ matrix.firmware }} >> $GITHUB_OUTPUT
-          FIRMWARE_DIRECTORY='devices/${{ matrix.device }}/${{ matrix.firmware }}'
-          echo "firmware-directory=${FIRMWARE_DIRECTORY}" >> $GITHUB_OUTPUT
+          poetry run python3 ci/get_firmware_metadata.py ${{ matrix.device }} ${{ matrix.firmware }}
+
+      - name: Read archive info from file
+        id: archive-data
+        run: poetry run python3 ci/parse_archive_info.py ${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-archive-path }}
+
+      - name: Restore cached apt dependencies
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: ${{ fromJSON(steps.get-device-metadata.outputs.json).cross-compiler-package }} ${{ env.APT_DEPS }}
+          version: 1.0
+
       - name: Restore kernel archive from cache
         id: cache-kernel-archive
         uses: actions/cache@v3
         with:
           path: ./linux-unifios.tar.gz
-          key: ${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-url-base64 }}
-      - name: Download kernel archive if required
-        if: steps.cache-kernel-archive.outputs.cache-hit != 'true'
+          key: ${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-sha256sum }}
+
+      - name: Download kernel archive if required (http)
+        if: steps.cache-kernel-archive.outputs.cache-hit != 'true' && env.DOWNLOAD_FROM_TORRENT != 'true'
         run: |
-          curl -Lo ./linux-unifios.tar.gz "${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-url }}"
+          curl -Lo ./linux-unifios.tar.gz "${{ steps.archive-data.outputs.firmware-http-url }}"
+
+      - name: Download kernel archive if required (torrent)
+        if: steps.cache-kernel-archive.outputs.cache-hit != 'true' &&  env.DOWNLOAD_FROM_TORRENT == 'true'
+        run: |
+          wget -O archive.torrent "${{ steps.archive-data.outputs.archive-torrent-url }}"
+          FILE_INDEX="$(aria2c -d . -S archive.torrent \
+            | grep '${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-archive-path }}$' \
+            | cut -d '|' -f1)"
+          aria2c -d . --seed-time=0 --select-file "${FILE_INDEX}" \
+            --bt-stop-timeout=10 --index-out="${FILE_INDEX}=./linux-unifios.tar.gz" \
+            archive.torrent || true
+
       - name: Ensure kernel SHA matches
         run: echo '${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-sha256sum }}  linux-unifios.tar.gz' | sha256sum -c
       - name: Extract Kernel
@@ -91,11 +151,6 @@ jobs:
           sed -i "s@%%VERSION%%@${{ needs.prepare-build.outputs.version }}@" ${{ steps.get-firmware-metadata.outputs.firmware-directory }}/patches/*.patch
       - name: Apply firmware-specific patches
         run: find ${{ steps.get-firmware-metadata.outputs.firmware-directory }}/patches -type f -name '*.patch' -print0 | sort -z | xargs -t -0 -n 1 patch -p0 -i
-      - name: Restore cached apt dependencies
-        uses: awalsh128/cache-apt-pkgs-action@v1
-        with:
-          packages: ${{ fromJSON(steps.get-device-metadata.outputs.json).cross-compiler-package }}
-          version: 1.0
       - name: Prepare for building
         run: |
           cd linux-source
@@ -121,13 +176,31 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ needs.prepare-build.outputs.python }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          version: latest
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os }}-${{ needs.prepare-build.outputs.python }}-${{ hashFiles('**/poetry.lock') }}
+
       - uses: actions/download-artifact@9bc31d5ccc31df68ecc42ccf4149144866c47d8a # 3.0.2
         id: download
         with:
           path: built_modules
       - name: Generate release text files
         run: |
-          python3 ci/build_release_text_files.py v${{ needs.prepare-build.outputs.version }} ${{steps.download.outputs.download-path}}
+          poetry run python3 ci/build_release_text_files.py v${{ needs.prepare-build.outputs.version }} ${{steps.download.outputs.download-path}}
       - name: Create release
         uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # 1.12.0
         with:
