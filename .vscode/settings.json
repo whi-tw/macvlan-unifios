@@ -1,0 +1,12 @@
+{
+  "json.schemas": [
+    {
+      "fileMatch": ["/devices/*/*/firmware_metadata.json"],
+      "url": "/.schemas/firmware_metadata.schema.json"
+    },
+    {
+      "fileMatch": ["/devices/*/device_metadata.json"],
+      "url": "/.schemas/device_metadata.schema.json"
+    }
+  ]
+}

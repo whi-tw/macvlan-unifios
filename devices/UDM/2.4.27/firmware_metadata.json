@@ -1,0 +1,5 @@
+{
+    "$schema": "../../../.schemas/firmware_metadata.schema.json",
+    "kernel-url": "https://archive.org/download/unifi-udr-gpl-archives/UDM/linux-udm-2.4.27.tar.gz",
+    "kernel-sha256sum": "9d1a90640f3a302817466e42bf4232bc4965641db1d442438e59d5086d91349e"
+}

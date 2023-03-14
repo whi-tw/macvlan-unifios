@@ -5,5 +5,5 @@
  MODULE_LICENSE("GPL");
  MODULE_AUTHOR("Patrick McHardy <kaber@trash.net>");
 -MODULE_DESCRIPTION("Driver for MAC address based VLANs");
-+MODULE_DESCRIPTION("Driver for MAC address based VLANs (https://github.com/whi-tw/macvlan-unifi-udr %%VERSION%%)");
++MODULE_DESCRIPTION("Driver for MAC address based VLANs (https://github.com/whi-tw/macvlan-unifios %%VERSION%%)");
  MODULE_ALIAS_RTNL_LINK("macvlan");
