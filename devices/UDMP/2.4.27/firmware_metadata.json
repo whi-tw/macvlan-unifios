@@ -1,0 +1,5 @@
+{
+    "$schema": "../../../.schemas/firmware_metadata.schema.json",
+    "kernel-url": "https://archive.org/download/unifi-udr-gpl-archives/UDMP/linux-udmp-2.4.27.tar.gz",
+    "kernel-sha256sum": "670c1922eb0f1ba2d0d836e76b258122b21c33df03adef45bd9c20334ffb51cb"
+}
