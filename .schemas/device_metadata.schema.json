@@ -20,5 +20,10 @@
       "type": "string",
       "pattern": "^[0-9a-z-]+$"
     }
-  }
+  },
+  "required": [
+    "architecture",
+    "cross-compiler",
+    "cross-compiler-package"
+  ]
 }

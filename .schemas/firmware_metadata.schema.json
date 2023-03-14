@@ -5,15 +5,19 @@
   "description": "Metadata for a specific firmware version",
   "type": "object",
   "properties": {
-    "kernel-url": {
-      "description": "URL to the kernel image",
+    "kernel-archive-path": {
+      "description": "Path to the kernel image within the firmware archive",
       "type": "string",
-      "format": "uri"
+      "pattern": "^([a-zA-Z-]+)\/linux-[a-zA-Z-]+-([0-9.]+).tar.gz$"
     },
     "kernel-sha256sum": {
       "description": "SHA256 hash of the kernel image",
       "type": "string",
       "pattern": "^[0-9a-f]{64}$"
     }
-  }
+  },
+  "required": [
+    "kernel-archive-path",
+    "kernel-sha256sum"
+  ]
 }

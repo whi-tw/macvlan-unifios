@@ -29,4 +29,5 @@ for device in devices:
         )
 
 
-print(f'ALL_CROSSCOMPILERS={",".join(crosscompiler_packages)}')
+with open(os.environ.get("GITHUB_OUTPUT", False), "a") as f:
+    f.write(f'ALL_CROSSCOMPILERS={",".join(crosscompiler_packages)}\n')

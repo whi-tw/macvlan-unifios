@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "macvlan-unifios"
+version = "0.1.0"
+description = ""
+authors = ["Tom Whitwell <tom@whi.tw>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+jinja2 = "^3.1.2"
+jsonschema = "^4.17.3"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.1.0"
+flake8 = "^6.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
