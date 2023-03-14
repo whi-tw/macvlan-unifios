@@ -22,8 +22,15 @@ jobs:
     outputs:
       matrix: ${{ steps.matrix.outputs.matrix }}
       version: ${{ steps.version.outputs.version }}
+      python: ${{ steps.tool-versions.outputs.python }}
     steps:
       - uses: actions/checkout@v3
+      - name: Read .tool-versions
+        uses: marocchino/tool-versions-action@v1
+        id: tool-versions
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ steps.tool-versions.outputs.python }}
       - name: 🏗️ Build matrix
         id: matrix
         run: python3 ci/generate_build_matrix.py >> $GITHUB_OUTPUT
@@ -48,13 +55,16 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ needs.prepare-build.outputs.python }}
       - name: Extract device metadata
         id: get-device-metadata
         run: python3 ci/get_device_metadata.py ${{ matrix.device }} >> $GITHUB_OUTPUT
       - name: Extract firmware metadata
         id: get-firmware-metadata
         run: |
-          python ci/get_firmware_metadata.py ${{ matrix.device }} ${{ matrix.firmware }} >> $GITHUB_OUTPUT
+          python3 ci/get_firmware_metadata.py ${{ matrix.device }} ${{ matrix.firmware }} >> $GITHUB_OUTPUT
           FIRMWARE_DIRECTORY='devices/${{ matrix.device }}/${{ matrix.firmware }}'
           echo "firmware-directory=${FIRMWARE_DIRECTORY}" >> $GITHUB_OUTPUT
       - name: Restore kernel archive from cache
@@ -116,7 +126,7 @@ jobs:
           path: built_modules
       - name: Generate release text files
         run: |
-          python ci/build_release_text_files.py v${{ needs.prepare-build.outputs.version }} ${{steps.download.outputs.download-path}}
+          python3 ci/build_release_text_files.py v${{ needs.prepare-build.outputs.version }} ${{steps.download.outputs.download-path}}
       - name: Create release
         uses: ncipollo/release-action@a2e71bdd4e7dab70ca26a852f29600c98b33153e # 1.12.0
         with:
