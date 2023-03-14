@@ -17,7 +17,7 @@ on:
 
 env:
   APT_DEPS: aria2
-  DOWNLOAD_FROM_TORRENT: true
+  DOWNLOAD_FROM_TORRENT: false
 
 jobs:
   prepare-build:
@@ -123,12 +123,12 @@ jobs:
           key: ${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-archive-path-base64 }}
 
       - name: Download kernel archive if required (http)
-        if: steps.cache-kernel-archive.outputs.cache-hit != 'true' && !env.DOWNLOAD_FROM_TORRENT
+        if: steps.cache-kernel-archive.outputs.cache-hit != 'true' && env.DOWNLOAD_FROM_TORRENT != 'true'
         run: |
           curl -Lo ./linux-unifios.tar.gz "${{ steps.archive-data.outputs.firmware-http-url }}"
 
       - name: Download kernel archive if required (torrent)
-        if: steps.cache-kernel-archive.outputs.cache-hit != 'true' && env.DOWNLOAD_FROM_TORRENT
+        if: steps.cache-kernel-archive.outputs.cache-hit != 'true' &&  env.DOWNLOAD_FROM_TORRENT == 'true'
         run: |
           wget -O archive.torrent "${{ steps.archive-data.outputs.archive-torrent-url }}"
           FILE_INDEX="$(aria2c -d . -S archive.torrent \
