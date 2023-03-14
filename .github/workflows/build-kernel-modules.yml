@@ -120,7 +120,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ./linux-unifios.tar.gz
-          key: ${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-archive-path-base64 }}
+          key: ${{ fromJSON(steps.get-firmware-metadata.outputs.json).kernel-sha256sum }}
 
       - name: Download kernel archive if required (http)
         if: steps.cache-kernel-archive.outputs.cache-hit != 'true' && env.DOWNLOAD_FROM_TORRENT != 'true'
