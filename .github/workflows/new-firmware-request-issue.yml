@@ -5,6 +5,9 @@ on:
     types:
       - opened
 
+env:
+  LABEL_COLOR: "#D9B245"
+
 jobs:
   process-new-issue:
     name: Process new issue
@@ -23,7 +26,7 @@ jobs:
       - name: Tag the issue
         run: |
           LABEL_NAME="device: ${{ steps.issue-fields.outputs.device }}"
-          gh label list | grep "${LABEL_NAME}" || gh label create "${LABEL_NAME}"
+          gh label create "${LABEL_NAME}" --force --color "${LABEL_COLOR}" --description "Firmware request for ${{ steps.issue-fields.outputs.device }}"
           gh issue edit ${{ github.event.issue.number }} --add-label "device: ${{ steps.issue-fields.outputs.device }}"
       - name: Fix the issue title
         run: |
