@@ -1,0 +1,5 @@
+{
+    "$schema": "../../../.schemas/firmware_metadata.schema.json",
+    "kernel-archive-path": "UDR/linux-udr-3.0.17.tar.gz",
+    "kernel-sha256sum": "f40b3fc5ffbb165f193f70a0cb39c4bacf5665796cb44bb4e9ba7827675846b0"
+}
