@@ -31,7 +31,12 @@ curl -Lo "${MODULE_DIR}/${MODULE_FILE_NAME}" "${RELEASE_DOWNLOAD_URL}" || {
     exit 1
 }
 
-cat <<'EOF' >/data/on_boot.d/01-load-macvlan-module.sh
+ONBOOT_DIR="${DATA_DIR}/on_boot.d"
+ONBOOT_FILE_NAME="${ONBOOT_DIR}/01-load-macvlan-module.sh"
+
+mkdir -p "${ONBOOT_DIR}"
+
+cat <<'EOF' >"${ONBOOT_FILE_NAME}"
 #!/usr/bin/env bash
 set -euo pipefail
 DEVICE="$(ubnt-device-info  model_short)"
@@ -48,4 +53,4 @@ fi
 insmod "${MODULE_FILE_PATH}"
 EOF
 
-chmod +x /data/on_boot.d/01-load-macvlan-module.sh
+chmod +x "${ONBOOT_FILE_NAME}"
