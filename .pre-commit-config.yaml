@@ -1,11 +1,11 @@
 exclude: ^devices/.*/kernel-config$
 repos:
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.15.3
+    rev: v8.18.2
     hooks:
       - id: gitleaks
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.33.0
+    rev: v0.39.0
     hooks:
       - id: markdownlint-fix
   - repo: https://github.com/thlorenz/doctoc
@@ -13,7 +13,7 @@ repos:
     hooks:
       - id: doctoc
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.5.0
     hooks:
       - id: check-yaml
       - id: trailing-whitespace
@@ -28,23 +28,23 @@ repos:
       - id: forbid-submodules
       - id: mixed-line-ending
   - repo: https://github.com/PyCQA/autoflake
-    rev: v2.0.1
+    rev: v2.3.1
     hooks:
       - id: autoflake
   - repo: https://github.com/PyCQA/isort
-    rev: 5.12.0
+    rev: 5.13.2
     hooks:
       - id: isort
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 24.3.0
     hooks:
       - id: black
   - repo: https://github.com/PyCQA/flake8
-    rev: 6.0.0
+    rev: 7.0.0
     hooks:
       - id: flake8
   - repo: https://github.com/python-jsonschema/check-jsonschema
-    rev: 0.21.0
+    rev: 0.28.0
     hooks:
       - id: check-github-workflows
       - id: check-jsonschema
